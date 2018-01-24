@@ -6,6 +6,15 @@ docker network create --driver overlay proxy
 
 docker network create --driver overlay go-demo
 
+echo "registry:"
+docker service create --name registry \
+    -p 5000:5000 \
+    --reserve-memory 100m \
+    --replicas 2 \
+    --constraint 'node.labels.env == prod-like' \
+    --mount "type=bind,source=$PWD,target=/var/lib/registry" \
+    registry:2.5.0
+
 
 echo "swarm-listener:"
 docker service create --name swarm-listener \
@@ -16,7 +25,7 @@ docker service create --name swarm-listener \
     -e DF_NOTIFY_REMOVE_SERVICE_URL=http://proxy:8080/v1/docker-flow-proxy/remove \
     --constraint 'node.role==manager' \
     --constraint 'node.labels.env == prod-like' \
-    vfarcic/docker-flow-swarm-listener
+    vfarcic/docker-flow-swarm-listener:18.01.06-29
 
 
 echo "proxy:"
@@ -27,7 +36,7 @@ docker service create --name proxy \
     --replicas 2 \
     -e LISTENER_ADDRESS=swarm-listener \
     --constraint 'node.labels.env == prod-like' \
-    vfarcic/docker-flow-proxy
+    vfarcic/docker-flow-proxy:18.01.18-98
 
 echo "go-demo-db:"
 docker service create --name go-demo-db \
@@ -35,7 +44,7 @@ docker service create --name go-demo-db \
     --constraint 'node.labels.env == prod-like' \
     mongo:3.2.10
 
-echo "go-demo:"
+echo "go-demo v1.6:"
 docker service create --name go-demo \
     -e DB=go-demo-db \
     --network go-demo \
@@ -47,6 +56,10 @@ docker service create --name go-demo \
     --constraint 'node.labels.env == prod-like' \
     --update-delay 5s \
     vfarcic/go-demo:1.6
+
+echo -e "To rolling update use service version >=1.7 like so:\ndocker service update \
+--image=localhost:5000/go-demo:1.7 \
+go-demo"
 
 echo ""
 echo ">> The services are up and running inside the swarm test cluster"
