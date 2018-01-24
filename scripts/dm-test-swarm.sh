@@ -25,6 +25,9 @@ for i in 2 3; do
         --token $TOKEN \
         --advertise-addr $(docker-machine ip swarm-test-$i) \
         $(docker-machine ip swarm-test-1):2377
+    docker node update \
+        --label-add env=prod-like \
+        swarm-test-$i
 done
 
 echo ">> The swarm test cluster is up and running"
