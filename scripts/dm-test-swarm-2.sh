@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [[ "$(uname -s )" == "Linux" ]]; then
-  export VIRTUALBOX_SHARE_FOLDER="$PWD:$PWD"
+  export VIRTUALBOX_SHARE_FOLDER="/hosthome/gide0n:/hosthome/gide0n"
 fi
 
 for i in 1 2 3; do
