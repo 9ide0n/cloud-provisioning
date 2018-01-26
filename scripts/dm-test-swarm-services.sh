@@ -10,7 +10,6 @@ echo "registry:"
 docker service create --name registry \
     -p 5000:5000 \
     --reserve-memory 100m \
-    --replicas 2 \
     --constraint 'node.labels.env == prod-like' \
     --mount "type=bind,source=$PWD,target=/var/lib/registry" \
     registry:2.5.0
@@ -19,7 +18,6 @@ docker service create --name registry \
 echo "swarm-listener:"
 docker service create --name swarm-listener \
     --network proxy \
-    --replicas 2 \
     --mount "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock" \
     -e DF_NOTIFY_CREATE_SERVICE_URL=http://proxy:8080/v1/docker-flow-proxy/reconfigure \
     -e DF_NOTIFY_REMOVE_SERVICE_URL=http://proxy:8080/v1/docker-flow-proxy/remove \
